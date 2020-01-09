@@ -13,7 +13,8 @@ Pod::Spec.new do |s|
   s.platform     = :ios, "9.0"
 
   s.source       = {:git => "https://github.com/jochem725/react-native-video-processing.git", :tag => "v#{s.version}" }
-  s.source_files  = "ios/**/*.{h,m,swift}"
+  s.source_files  = "ios/**/*.{h,m}"
 
   s.dependency 'React'
+  s.dependency 'GPUImage', '0.1.7'
 end
