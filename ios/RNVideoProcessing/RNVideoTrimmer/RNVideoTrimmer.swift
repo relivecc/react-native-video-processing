@@ -213,24 +213,57 @@ class RNVideoTrimmer: NSObject {
             sTime = 0
         }
 
+        let composition = AVMutableComposition()
         let startTime = CMTime(seconds: Double(sTime!), preferredTimescale: 1000)
         let endTime = CMTime(seconds: Double(eTime!), preferredTimescale: 1000)
         let timeRange = CMTimeRange(start: startTime, end: endTime)
-
-        let composition = AVMutableComposition()
+        
+        let videoTrack = asset.tracks(withMediaType: AVMediaType.video).first!
+        let videoCompositionTrack = composition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID: kCMPersistentTrackID_Invalid)!
         do {
-          try composition.insertTimeRange(timeRange, of: asset, at: CMTime.zero)
+          try videoCompositionTrack.insertTimeRange(timeRange, of: videoTrack, at: CMTime.zero)
         } catch {
           callback(["Error inserting time range", NSNull()])
           // Error handling code here
           return
         }
 
+        let size = videoTrack.naturalSize
+        let txf = videoTrack.preferredTransform
+
+        var recordType = ""
+        if (size.width == txf.tx && size.height == txf.ty) {
+          recordType = "UIInterfaceOrientationLandscapeRight"
+        } else if (txf.tx == 0 && txf.ty == 0) {
+          recordType = "UIInterfaceOrientationLandscapeLeft"
+        } else if (txf.tx == 0 && txf.ty == size.width) {
+          recordType = "UIInterfaceOrientationPortraitUpsideDown"
+        } else {
+          recordType = "UIInterfaceOrientationPortrait"
+        }
+
+        if (recordType == "UIInterfaceOrientationPortrait") {
+          let t1: CGAffineTransform = CGAffineTransform(translationX: videoTrack.naturalSize.height, y: -(videoTrack.naturalSize.width - videoTrack.naturalSize.height)/2)
+          let t2: CGAffineTransform = t1.rotated(by: CGFloat(Double.pi / 2))
+          let finalTransform: CGAffineTransform = t2
+          videoCompositionTrack.preferredTransform = finalTransform
+        } else if (recordType == "UIInterfaceOrientationLandscapeRight") {
+          let t1: CGAffineTransform = CGAffineTransform(translationX: videoTrack.naturalSize.height, y: -(videoTrack.naturalSize.width - videoTrack.naturalSize.height)/2)
+          let t2: CGAffineTransform = t1.rotated(by: -CGFloat(Double.pi))
+          let finalTransform: CGAffineTransform = t2
+          videoCompositionTrack.preferredTransform = finalTransform
+        } else if (recordType == "UIInterfaceOrientationPortraitUpsideDown") {
+          let t1: CGAffineTransform = CGAffineTransform(translationX: videoTrack.naturalSize.height, y: -(videoTrack.naturalSize.width - videoTrack.naturalSize.height)/2)
+          let t2: CGAffineTransform = t1.rotated(by: -CGFloat(Double.pi/2))
+          let finalTransform: CGAffineTransform = t2
+          videoCompositionTrack.preferredTransform = finalTransform
+        }
+
         var outputURL = documentDirectory.appendingPathComponent("output")
         do {
             try manager.createDirectory(at: outputURL, withIntermediateDirectories: true, attributes: nil)
             let name = self.randomString()
-            outputURL = outputURL.appendingPathComponent("\(name).mp4")
+            outputURL = outputURL.appendingPathComponent("\(name).mov")
         } catch {
             callback([error.localizedDescription, NSNull()])
             print(error)
@@ -250,7 +283,7 @@ class RNVideoTrimmer: NSObject {
                 return
         }
         exportSession.outputURL = NSURL.fileURL(withPath: outputURL.path)
-        exportSession.outputFileType = .mp4
+        exportSession.outputFileType = .mov
         exportSession.shouldOptimizeForNetworkUse = true
 
         if saveToCameraRoll && saveWithCurrentDate {
