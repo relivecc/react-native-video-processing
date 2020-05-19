@@ -118,5 +118,7 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  private void loadFfmpeg() {}
+  private void loadFfmpeg() {
+    Trimmer.loadFfmpeg(reactContext);
+  }
 }
