@@ -414,6 +414,7 @@ public class Trimmer {
     cmd.add("-i");
     cmd.add(source);
 
+    // FROM https://stackoverflow.com/a/46693766
     cmd.add("-vf");
     cmd.add("scale="+width+":"+height+":force_original_aspect_ratio=decrease,pad="+width+":"+height+":(ow-iw)/2:(oh-ih)/2,setsar=1");
 
@@ -423,8 +424,8 @@ public class Trimmer {
     cmd.add("-c:a");
     cmd.add("copy");
     // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
-    cmd.add("-strict");
-    cmd.add("-2");
+    // cmd.add("-strict");
+    // cmd.add("-2");
     // NOTE: OUTPUT FILE
     cmd.add(tempFile.getPath());
 
