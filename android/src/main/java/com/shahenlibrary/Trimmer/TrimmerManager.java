@@ -118,6 +118,12 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void pad(ReadableMap options, Promise promise) {
+    Log.d(REACT_PACKAGE, options.toString());
+    Trimmer.pad(options, promise, reactContext);
+  }
+
+  @ReactMethod
   private void loadFfmpeg() {
     Trimmer.loadFfmpeg(reactContext);
   }
