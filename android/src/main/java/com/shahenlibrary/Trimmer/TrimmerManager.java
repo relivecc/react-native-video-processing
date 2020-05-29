@@ -42,7 +42,7 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   private final ReactApplicationContext reactContext;
 
   static {
-      System.loadLibrary("libffmpeg");
+      System.loadLibrary("ffmpeg");
   }
 
   public TrimmerManager(ReactApplicationContext reactContext) {
